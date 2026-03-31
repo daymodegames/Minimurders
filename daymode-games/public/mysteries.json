@@ -1,0 +1,117 @@
+{
+  "mysteries": [
+    {
+      "id": "001",
+      "title": "Dead on Arrival",
+      "tag": "Mystery #001",
+      "intro": "A man is found dead in the middle of a frozen lake. A trail of blood leads from the treeline. In his hand — a phone, 911 dialed but never sent.",
+      "flavor": "Three friends were with him for the weekend. They say they were out on a beer run when it happened. Someone is lying. Or maybe no one is.",
+      "victim": "Jeffrey",
+      "actions": 5,
+      "solution": "accident",
+      "spoiler": "Jeffrey was alone in the cabin when he tripped on the uneven hearthstone and fell onto the fire poker. His friends were 20 minutes away — the receipt proves it. He walked onto the frozen lake looking for a signal strong enough to call for help. He never made it.",
+      "suspects": [
+        {
+          "id": "tyler",
+          "name": "Tyler",
+          "initial": "TY",
+          "color": "blue",
+          "role": "Groom-to-be. His cabin, his bachelor party, his best friend just died.",
+          "topics": [
+            {
+              "id": "jeffrey",
+              "label": "Ask about Jeffrey",
+              "response": "He was going to be my best man. I can't believe this happened. He can barely get the words out."
+            },
+            {
+              "id": "cabin",
+              "label": "Ask about the cabin",
+              "response": "It belongs to my in-laws. They already hate me for choosing Jeffrey as best man instead of Paul. I don't know what to do now."
+            },
+            {
+              "id": "wedding",
+              "label": "Ask about the wedding",
+              "response": "What about it — I'm getting married in two months and now my best man is dead. I don't want to cancel but this feels like a sign."
+            }
+          ]
+        },
+        {
+          "id": "paul",
+          "name": "Paul",
+          "initial": "PA",
+          "color": "red",
+          "role": "Tyler's future brother-in-law. Passed over for best man. Stayed at the cabin while the others left.",
+          "topics": [
+            {
+              "id": "bestman",
+              "label": "Ask about the best man situation",
+              "response": "Hmph. I don't even care. My sister is marrying a loser and his friends all think he's so cool. Being best man is whatever. He won't make eye contact."
+            },
+            {
+              "id": "cabin",
+              "label": "Ask about the cabin",
+              "response": "I can't believe this happened. My parents are going to kill me. Or maybe say the wedding is off — which would not be a bad thing. I've been trying to reach them but there's no signal out here."
+            },
+            {
+              "id": "beerrun",
+              "label": "Ask why he didn't go on the beer run",
+              "response": "It's my parents' cabin. I needed to stay and make sure things were fine. I was on the porch most of the time — freezing. I needed to clean some stuff. I don't know, man. He's agitated."
+            }
+          ]
+        },
+        {
+          "id": "omar",
+          "name": "Omar",
+          "initial": "OM",
+          "color": "amber",
+          "role": "The wild card. Suggested the beer run. Got everyone out of the cabin.",
+          "topics": [
+            {
+              "id": "beerrun",
+              "label": "Ask about the beer run",
+              "response": "It was party time and Paul forgot to get drinks. I wanted poker, but Jeffrey was going sober — so we figured we'd have a little fun without making it weird for him."
+            },
+            {
+              "id": "weekend",
+              "label": "Ask about the weekend",
+              "response": "My boy is getting married — clearly for the money, but still. Jeffrey wanted this whole trip so bad. Honestly? I think he was going to ask Tyler for money after the wedding."
+            },
+            {
+              "id": "jeffrey",
+              "label": "Ask about Jeffrey",
+              "response": "Jeffrey's a guy with no job, no prospects. Owns a phone, that's about it. Tyler still treats him like they're in college. A pause. I just mean... he had a lot riding on Tyler."
+            }
+          ]
+        }
+      ],
+      "clues": [
+        {
+          "id": "poker",
+          "label": "The fire poker",
+          "response": "There's dried blood along the lower half of the shaft. It wasn't thrown — it's right where it would normally rest by the fireplace."
+        },
+        {
+          "id": "step",
+          "label": "Fireplace stonework",
+          "response": "One of the hearthstones sits slightly higher than the rest. Maybe an inch. Easy to miss in dim light. Easy to catch your foot on."
+        },
+        {
+          "id": "ring",
+          "label": "A gold ring on the table",
+          "response": "A gold band. Engraved on the inside: T + M. A wedding ring — but Jeffrey wasn't married."
+        },
+        {
+          "id": "receipt",
+          "label": "A crumpled receipt",
+          "response": "A gas station receipt. Two six-packs and a bag of chips. Timestamp: 9:47 PM. The store is 20 minutes from here."
+        }
+      ],
+      "accusations": [
+        { "id": "tyler",    "label": "Tyler — his cabin, his fire poker" },
+        { "id": "paul",     "label": "Paul — stayed behind, had motive" },
+        { "id": "omar",     "label": "Omar — engineered everyone leaving" },
+        { "id": "accident", "label": "Nobody — it was an accident" }
+      ]
+    }
+  ]
+}
