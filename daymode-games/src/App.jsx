@@ -16,7 +16,7 @@ function App() {
 
   // ─── LOAD MYSTERY ──────────────────────────────────────────────────────────
   useEffect(() => {
-    fetch('/mysteries.json')
+    fetch('/api/mysteries')
       .then(res => res.json())
       .then(data => {
         const m = data.mysteries[0]
