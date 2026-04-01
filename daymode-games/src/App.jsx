@@ -10,37 +10,41 @@ function App() {
   const [activeSuspect, setActiveSuspect] = useState(null)
   const [lastResponse, setLastResponse] = useState('')
   const [accusedTarget, setAccusedTarget] = useState(null)
+  const [notes, setNotes] = useState([])
+  const [pendingNote, setPendingNote] = useState(null)
+  const [showCaseFile, setShowCaseFile] = useState(false)
 
   // ─── LOAD MYSTERY ──────────────────────────────────────────────────────────
   useEffect(() => {
     fetch('/mysteries.json')
       .then(res => res.json())
       .then(data => {
-  const mysteries = data.mysteries
-  const start = new Date('2026-04-01') // your launch date
-  const today = new Date()
-  const daysSinceStart = Math.floor((today - start) / (1000 * 60 * 60 * 24))
-  const index = daysSinceStart % mysteries.length
-  const m = mysteries[index]
-  setMystery(m)
-  setActions(m.actions)
+        const m = data.mysteries[0]
+        setMystery(m)
+        setActions(m.actions)
       })
   }, [])
 
-  // ─── ACTIONS ───────────────────────────────────────────────────────────────
-  function handleActionUse(newActions) {
-    if (newActions <= 0) setScreen('accuse')
+  // ─── COMMIT PENDING NOTE ───────────────────────────────────────────────────
+  function commitNote() {
+    if (pendingNote) {
+      setNotes(prev => [...prev, pendingNote])
+      setPendingNote(null)
+    }
+    setLastResponse('')
   }
 
   // ─── SUSPECTS ──────────────────────────────────────────────────────────────
   function selectSuspect(id) {
+    commitNote()
     setActiveSuspect(id === activeSuspect ? null : id)
-    setLastResponse('')
   }
 
   function askTopic(suspectId, topicId) {
     if (actions <= 0) return
     if (askedTopics[suspectId]?.includes(topicId)) return
+
+    commitNote()
 
     const newAsked = {
       ...askedTopics,
@@ -50,11 +54,10 @@ function App() {
 
     const suspect = mystery.suspects.find(s => s.id === suspectId)
     const topic = suspect.topics.find(t => t.id === topicId)
-    setLastResponse(topic.response)
 
-    const newActions = actions - 1
-    setActions(newActions)
-    handleActionUse(newActions)
+    setLastResponse(topic.response)
+    setPendingNote(`${suspect.name}, when asked about ${topic.label.replace('Ask about ', '').replace('Ask ', '')}: "${topic.response}"`)
+    setActions(prev => prev - 1)
   }
 
   // ─── CLUES ─────────────────────────────────────────────────────────────────
@@ -62,18 +65,20 @@ function App() {
     if (actions <= 0) return
     if (examinedClues.includes(id)) return
 
+    commitNote()
+
     const clue = mystery.clues.find(c => c.id === id)
     setExaminedClues([...examinedClues, id])
-    setLastResponse(clue.response)
     setActiveSuspect(null)
 
-    const newActions = actions - 1
-    setActions(newActions)
-    handleActionUse(newActions)
+    setLastResponse(clue.response)
+    setPendingNote(`You examined ${clue.label.toLowerCase()}: "${clue.response}"`)
+    setActions(prev => prev - 1)
   }
 
   // ─── ACCUSATION ────────────────────────────────────────────────────────────
   function accuse(target) {
+    commitNote()
     setAccusedTarget(target)
     setScreen('result')
   }
@@ -86,6 +91,9 @@ function App() {
     setActiveSuspect(null)
     setLastResponse('')
     setAccusedTarget(null)
+    setNotes([])
+    setPendingNote(null)
+    setShowCaseFile(false)
     setScreen('intro')
   }
 
@@ -116,69 +124,144 @@ function App() {
 
       {/* GAME */}
       {screen === 'game' && (
-        <div>
-          <div className="action-bar">
-            <div className="actions-left">Actions remaining: <span>{actions}</span></div>
-            <button className="btn btn-small" onClick={() => setScreen('accuse')}>Accuse someone</button>
-          </div>
+        <div className="game-layout">
 
-          {/* SUSPECTS */}
-          <div className="section-label">Suspects</div>
-          <div className="suspect-grid">
-            {mystery.suspects.map(s => (
-              <div
-                key={s.id}
-                className={`suspect-btn ${activeSuspect === s.id ? 'active' : ''}`}
-                onClick={() => selectSuspect(s.id)}
-              >
-                <div style={{fontSize: '13px', fontWeight: 500}}>{s.name}</div>
-                <div style={{fontSize: '11px', color: '#888'}}>{s.role.split('.')[0]}</div>
-              </div>
-            ))}
-          </div>
+          {/* LEFT / TOP — investigation */}
+          <div>
 
-          {/* SUSPECT TOPICS — expands inline when a suspect is selected */}
-          {activeSuspect && (() => {
-            const suspect = mystery.suspects.find(s => s.id === activeSuspect)
-            return (
-              <div className="card" style={{marginBottom: '1rem'}}>
-                <h3 style={{marginBottom: '0.75rem'}}>{suspect.name}</h3>
-                <p style={{fontSize: '13px', marginBottom: '0.75rem'}}>{suspect.role}</p>
-                {suspect.topics.map(t => {
-                  const used = askedTopics[suspect.id]?.includes(t.id)
-                  return (
-                    <button
-                      key={t.id}
-                      className="btn"
-                      disabled={used}
-                      onClick={() => askTopic(suspect.id, t.id)}
-                    >
-                      {used ? '✓ ' : ''}{t.label}
-                    </button>
-                  )
-                })}
-              </div>
-            )
-          })()}
-
-          {/* RESPONSE */}
-          {lastResponse && <div className="response-box">{lastResponse}</div>}
-
-          {/* CLUES */}
-          <hr className="divider" />
-          <div className="section-label">Examine the scene</div>
-          <div className="clue-grid">
-            {mystery.clues.map(c => (
+            {/* ACTION BAR */}
+            <div className="action-bar">
+              <div className="actions-left">Actions remaining: <span>{actions}</span></div>
               <button
-                key={c.id}
-                className={`clue-btn ${examinedClues.includes(c.id) ? 'examined' : ''}`}
-                onClick={() => examineClue(c.id)}
-                disabled={examinedClues.includes(c.id)}
+                style={{background: 'none', border: 'none', fontSize: '13px', color: '#888', cursor: 'pointer'}}
+                onClick={() => setShowCaseFile(!showCaseFile)}
               >
-                {c.label}
+                📁 Case file
               </button>
-            ))}
+            </div>
+
+            {/* CASE FILE DRAWER */}
+            {showCaseFile && (
+              <div className="card" style={{marginBottom: '1rem', borderLeft: '3px solid #ccc'}}>
+                <h3 style={{marginBottom: '0.5rem'}}>{mystery.title}</h3>
+                <p style={{marginBottom: '0.5rem'}}>{mystery.intro}</p>
+                <p style={{marginBottom: '0.5rem'}}>{mystery.flavor}</p>
+                <p style={{fontSize: '13px', color: '#888', marginBottom: 0}}>Victim: {mystery.victim}</p>
+              </div>
+            )}
+
+            {/* SUSPECTS */}
+            <div className="section-label">Suspects</div>
+            <div className="suspect-grid">
+              {mystery.suspects.map(s => (
+                <div
+                  key={s.id}
+                  className={`suspect-btn ${activeSuspect === s.id ? 'active' : ''}`}
+                  onClick={() => selectSuspect(s.id)}
+                >
+                  <div style={{fontSize: '13px', fontWeight: 500}}>{s.name}</div>
+                  <div style={{fontSize: '11px', color: '#888'}}>{s.role.split('.')[0]}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* SUSPECT TOPICS */}
+            {activeSuspect && (() => {
+              const suspect = mystery.suspects.find(s => s.id === activeSuspect)
+              return (
+                <div className="card" style={{marginBottom: '1rem'}}>
+                  <h3 style={{marginBottom: '0.75rem'}}>{suspect.name}</h3>
+                  <p style={{fontSize: '13px', marginBottom: '0.75rem'}}>{suspect.role}</p>
+                  {suspect.topics.map(t => {
+                    const used = askedTopics[suspect.id]?.includes(t.id)
+                    return (
+                      <button
+                        key={t.id}
+                        className="btn"
+                        disabled={used}
+                        onClick={() => askTopic(suspect.id, t.id)}
+                      >
+                        {used ? '✓ ' : ''}{t.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              )
+            })()}
+
+            {/* RESPONSE */}
+            {lastResponse && <div className="response-box">{lastResponse}</div>}
+
+            {/* CLUES */}
+            <hr className="divider" />
+            <div className="section-label">Examine the scene</div>
+            <div className="clue-grid">
+              {mystery.clues.map(c => (
+                <button
+                  key={c.id}
+                  className={`clue-btn ${examinedClues.includes(c.id) ? 'examined' : ''}`}
+                  onClick={() => examineClue(c.id)}
+                  disabled={examinedClues.includes(c.id)}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+
+            {/* ACCUSE BUTTON */}
+            <div style={{marginTop: '2rem'}}>
+              <button
+                className="btn"
+                style={{
+                  textAlign: 'center',
+                  background: actions === 0 ? '#1a1a1a' : '#f0ede8',
+                  color: actions === 0 ? '#fff' : '#888',
+                  border: actions === 0 ? 'none' : '1px solid #ddd',
+                  transition: 'all 0.3s ease'
+                }}
+                onClick={() => { commitNote(); setScreen('accuse') }}
+              >
+                {actions === 0 ? 'Make your accusation' : 'Accuse someone'}
+              </button>
+            </div>
+
+            {/* NIGHT MODE */}
+            <div style={{marginTop: '1rem', textAlign: 'center'}}>
+              <button
+                style={{background: 'none', border: 'none', fontSize: '12px', color: '#ccc', cursor: 'pointer'}}
+                onClick={() => window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')}
+              >
+                🌙 night mode
+              </button>
+            </div>
+
           </div>
+
+          {/* RIGHT / BOTTOM — notes */}
+          <div>
+            <div className="section-label">Your notes</div>
+            {notes.length === 0
+              ? <p style={{fontSize: '13px', color: '#bbb', fontStyle: 'italic'}}>Nothing yet. Start investigating.</p>
+              : (
+                <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+                  {notes.map((note, i) => (
+                    <div key={i} style={{
+                      fontSize: '13px',
+                      color: '#555',
+                      lineHeight: '1.6',
+                      padding: '0.65rem 0.75rem',
+                      background: '#f9f8f5',
+                      borderRadius: '6px',
+                      borderLeft: '3px solid #ddd'
+                    }}>
+                      {note}
+                    </div>
+                  ))}
+                </div>
+              )
+            }
+          </div>
+
         </div>
       )}
 
