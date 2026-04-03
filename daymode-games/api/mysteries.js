@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
-  const SHEET_ID = '1FLms3sb48UeBe0kLKvgUHoqJAmdE0cx33QMPWmLMwRA'
-  const API_KEY = 'AIzaSyCMeUYmxpjmyW2cGMXL-A7gH8ZCCBNZmKk'
-  const SHEET_NAME = 'Sheet1'
+  const SHEET_ID = '1FLms3sb48UeBe0kLKvgUHoqJAmdE0cx33QMPWmLMwRA';
+  const API_KEY = process.env.GOOGLE_SHEETS_API_KEY;
+  const SHEET_NAME = 'Sheet1';
 
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`
 
