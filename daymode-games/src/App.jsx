@@ -11,40 +11,36 @@ function App() {
   const [lastResponse, setLastResponse] = useState('')
   const [accusedTarget, setAccusedTarget] = useState(null)
   const [notes, setNotes] = useState([])
-  const [pendingNote, setPendingNote] = useState(null)
   const [showCaseFile, setShowCaseFile] = useState(false)
+  const [difficulty, setDifficulty] = useState(null)
+  const [manualNotes, setManualNotes] = useState('')
 
   // ─── LOAD MYSTERY ──────────────────────────────────────────────────────────
   useEffect(() => {
     fetch('/api/mysteries')
       .then(res => res.json())
       .then(data => {
-        const m = data.mysteries[0]
+        const m = data.mysteries[data.mysteries.length - 1]
         setMystery(m)
         setActions(m.actions)
       })
   }, [])
 
-  // ─── COMMIT PENDING NOTE ───────────────────────────────────────────────────
-  function commitNote() {
-    if (pendingNote) {
-      setNotes(prev => [...prev, pendingNote])
-      setPendingNote(null)
-    }
-    setLastResponse('')
+  // ─── START GAME ────────────────────────────────────────────────────────────
+  function startGame(mode) {
+    setDifficulty(mode)
+    setScreen('game')
   }
 
   // ─── SUSPECTS ──────────────────────────────────────────────────────────────
   function selectSuspect(id) {
-    commitNote()
     setActiveSuspect(id === activeSuspect ? null : id)
+    setLastResponse('')
   }
 
   function askTopic(suspectId, topicId) {
     if (actions <= 0) return
     if (askedTopics[suspectId]?.includes(topicId)) return
-
-    commitNote()
 
     const newAsked = {
       ...askedTopics,
@@ -54,9 +50,12 @@ function App() {
 
     const suspect = mystery.suspects.find(s => s.id === suspectId)
     const topic = suspect.topics.find(t => t.id === topicId)
-
     setLastResponse(topic.response)
-    setPendingNote(`${suspect.name}, when asked about ${topic.label.replace('Ask about ', '').replace('Ask ', '')}: "${topic.response}"`)
+
+    if (difficulty === 'rookie') {
+      setNotes(prev => [...prev, `${suspect.name}, when asked about ${topic.label.replace('Ask about ', '').replace('Ask ', '')}: "${topic.response}"`])
+    }
+
     setActions(prev => prev - 1)
   }
 
@@ -65,20 +64,20 @@ function App() {
     if (actions <= 0) return
     if (examinedClues.includes(id)) return
 
-    commitNote()
-
     const clue = mystery.clues.find(c => c.id === id)
     setExaminedClues([...examinedClues, id])
+    setLastResponse(clue.response)
     setActiveSuspect(null)
 
-    setLastResponse(clue.response)
-    setPendingNote(`You examined ${clue.label.toLowerCase()}: "${clue.response}"`)
+    if (difficulty === 'rookie') {
+      setNotes(prev => [...prev, `You examined ${clue.label.toLowerCase()}: "${clue.response}"`])
+    }
+
     setActions(prev => prev - 1)
   }
 
   // ─── ACCUSATION ────────────────────────────────────────────────────────────
   function accuse(target) {
-    commitNote()
     setAccusedTarget(target)
     setScreen('result')
   }
@@ -92,8 +91,9 @@ function App() {
     setLastResponse('')
     setAccusedTarget(null)
     setNotes([])
-    setPendingNote(null)
+    setManualNotes('')
     setShowCaseFile(false)
+    setDifficulty(null)
     setScreen('intro')
   }
 
@@ -116,9 +116,14 @@ function App() {
           <p>{mystery.flavor}</p>
           <div className="card">
             <h3>How to play</h3>
-            <p style={{marginBottom: 0}}>You have <strong>{mystery.actions}</strong> actions. Question suspects, examine the scene, then make your accusation. Fully questioning one suspect is a commitment — choose wisely.</p>
+            <p>You have <strong>{mystery.actions}</strong> actions. Question suspects, examine the scene, then make your accusation. Fully questioning one suspect is a commitment — choose wisely.</p>
+            <p style={{marginBottom: '0.25rem'}}><strong>Rookie Detective</strong> — Focus on the case. Notes from clues are updated automatically.</p>
+            <p style={{marginBottom: 0}}><strong>Chief Inspector</strong> — You're leading this one. No auto-notes — every detail you miss stays missed.</p>
           </div>
-          <button className="btn btn-primary" onClick={() => setScreen('game')}>Begin investigation</button>
+          <div style={{display: 'flex', gap: '1rem', marginTop: '1rem'}}>
+            <button className="btn btn-primary" style={{flex: 1}} onClick={() => startGame('rookie')}> Rookie Detective</button>
+            <button className="btn btn-primary" style={{flex: 1}} onClick={() => startGame('chief')}> Chief Inspector</button>
+          </div>
         </div>
       )}
 
@@ -132,12 +137,20 @@ function App() {
             {/* ACTION BAR */}
             <div className="action-bar">
               <div className="actions-left">Actions remaining: <span>{actions}</span></div>
-              <button
-                style={{background: 'none', border: 'none', fontSize: '13px', color: '#888', cursor: 'pointer'}}
-                onClick={() => setShowCaseFile(!showCaseFile)}
-              >
-                📁 Case file
-              </button>
+              <div style={{display: 'flex', gap: '0.75rem', alignItems: 'center'}}>
+                <button
+                  style={{background: 'none', border: 'none', fontSize: '13px', color: '#888', cursor: 'pointer'}}
+                  onClick={() => setShowCaseFile(!showCaseFile)}
+                >
+                  📁 Case file
+                </button>
+                <button
+                  style={{background: 'none', border: 'none', fontSize: '13px', color: '#888', cursor: 'pointer'}}
+                  onClick={resetGame}
+                >
+                  ← Main menu
+                </button>
+              </div>
             </div>
 
             {/* CASE FILE DRAWER */}
@@ -219,7 +232,7 @@ function App() {
                   border: actions === 0 ? 'none' : '1px solid #ddd',
                   transition: 'all 0.3s ease'
                 }}
-                onClick={() => { commitNote(); setScreen('accuse') }}
+                onClick={() => setScreen('accuse')}
               >
                 {actions === 0 ? 'Make your accusation' : 'Accuse someone'}
               </button>
@@ -239,27 +252,53 @@ function App() {
 
           {/* RIGHT / BOTTOM — notes */}
           <div>
-            <div className="section-label">Your notes</div>
-            {notes.length === 0
-              ? <p style={{fontSize: '13px', color: '#bbb', fontStyle: 'italic'}}>Nothing yet. Start investigating.</p>
-              : (
-                <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
-                  {notes.map((note, i) => (
-                    <div key={i} style={{
-                      fontSize: '13px',
-                      color: '#555',
-                      lineHeight: '1.6',
-                      padding: '0.65rem 0.75rem',
-                      background: '#f9f8f5',
-                      borderRadius: '6px',
-                      borderLeft: '3px solid #ddd'
-                    }}>
-                      {note}
-                    </div>
-                  ))}
-                </div>
-              )
-            }
+            <div className="section-label">
+              Your notes {difficulty === 'chief' && <span style={{fontSize: '11px', color: '#aaa', fontWeight: 400}}>— Chief Inspector mode</span>}
+            </div>
+
+            {difficulty === 'rookie' && (
+              notes.length === 0
+                ? <p style={{fontSize: '13px', color: '#bbb', fontStyle: 'italic'}}>Nothing yet. Start investigating.</p>
+                : (
+                  <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+                    {notes.map((note, i) => (
+                      <div key={i} style={{
+                        fontSize: '13px',
+                        color: '#555',
+                        lineHeight: '1.6',
+                        padding: '0.65rem 0.75rem',
+                        background: '#f9f8f5',
+                        borderRadius: '6px',
+                        borderLeft: '3px solid #ddd'
+                      }}>
+                        {note}
+                      </div>
+                    ))}
+                  </div>
+                )
+            )}
+
+            {difficulty === 'chief' && (
+              <textarea
+                value={manualNotes}
+                onChange={e => setManualNotes(e.target.value)}
+                placeholder="Your investigation, your notes..."
+                style={{
+                  width: '100%',
+                  minHeight: '300px',
+                  fontSize: '13px',
+                  lineHeight: '1.7',
+                  color: '#444',
+                  background: '#f9f8f5',
+                  border: '1px solid #e0ddd8',
+                  borderRadius: '6px',
+                  padding: '0.75rem',
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                  boxSizing: 'border-box'
+                }}
+              />
+            )}
           </div>
 
         </div>
@@ -288,9 +327,11 @@ function App() {
             ))}
           </div>
           <p>{correct ? 'You read the scene correctly. The clues were there — you found them.' : "The evidence didn't support that accusation — but the truth is still out there."}</p>
-          <button className="btn btn-primary" style={{marginTop: '0.5rem'}} onClick={resetGame}>
-            {correct ? 'Play again' : 'Try again'}
-          </button>
+          <div style={{display: 'flex', gap: '1rem', marginTop: '0.5rem'}}>
+            <button className="btn btn-primary" onClick={resetGame}>
+              ← Main menu
+            </button>
+          </div>
         </div>
       )}
 
