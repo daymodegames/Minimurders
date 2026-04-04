@@ -260,21 +260,21 @@ function App() {
               notes.length === 0
                 ? <p style={{fontSize: '13px', color: '#bbb', fontStyle: 'italic'}}>Nothing yet. Start investigating.</p>
                 : (
-                  <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
-                    {notes.map((note, i) => (
-                      <div key={i} style={{
-                        fontSize: '13px',
-                        color: '#555',
-                        lineHeight: '1.6',
-                        padding: '0.65rem 0.75rem',
-                        background: '#f9f8f5',
-                        borderRadius: '6px',
-                        borderLeft: '3px solid #ddd'
-                      }}>
-                        {note}
-                      </div>
-                    ))}
-                  </div>
+                 <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+  {[...notes].reverse().map((note, i) => (
+    <div key={i} style={{
+      fontSize: '13px',
+      color: '#555',
+      lineHeight: '1.6',
+      padding: '0.65rem 0.75rem',
+      background: '#f9f8f5',
+      borderRadius: '6px',
+      borderLeft: '3px solid #ddd'
+    }}>
+      {note}
+    </div>
+  ))}
+</div>
                 )
             )}
 
