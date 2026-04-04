@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-
+import { Analytics } from "@vercel/analytics/next"
 function App() {
   const [mystery, setMystery] = useState(null)
   const [screen, setScreen] = useState('intro')
