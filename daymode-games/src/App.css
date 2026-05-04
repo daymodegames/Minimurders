@@ -1,133 +1,259 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* ─── TOKENS ──────────────────────────────────────────────────────────────── */
+:root {
+  --charcoal:   #2C2C2A;
+  --paper:      #F1EFE8;
+  --gold:       #FAC775;
+  --crimson:    #791F1F;
+  --slate:      #378ADD;
+  --terracotta: #D85A30;
+  --sage:       #1D9E75;
+  --muted:      #888780;
+  --border:     #D3D1C7;
+  --surface:    rgba(255, 255, 255, 0.82);
+  --dot-spent:  rgba(68, 68, 65, 0.35);
+}
+
+/* ─── RESET & BASE ────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   font-family: system-ui, sans-serif;
-  background: #f5f4f0;
-  color: #1a1a1a;
+  background: radial-gradient(ellipse 70% 60% at 50% 38%, #FAF7F0 0%, #F0EDE4 40%, #D9D4C7 100%);
+  background-attachment: fixed;
+  color: var(--charcoal);
   min-height: 100vh;
   padding: 2rem 1rem;
 }
 
-#game {
+/* ─── GAME WRAPPER ────────────────────────────────────────────────────────── */
+.game {
   max-width: 960px;
   margin: 0 auto;
 }
 
-.screen { display: none; }
-.screen.active { display: block; }
+/* ─── TYPOGRAPHY ──────────────────────────────────────────────────────────── */
+h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--charcoal);
+  margin-bottom: 0.5rem;
+}
 
-h1 { font-size: 28px; font-weight: 500; margin-bottom: 0.5rem; }
-h2 { font-size: 22px; font-weight: 500; margin-bottom: 1rem; }
-h3 { font-size: 17px; font-weight: 500; margin-bottom: 0.5rem; }
-p  { font-size: 15px; color: #555; line-height: 1.7; margin-bottom: 1rem; }
-
-/* --- Cards --- */
-.card {
-  background: #fff;
-  border: 1px solid #e0ddd6;
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
+h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--charcoal);
   margin-bottom: 1rem;
 }
 
-/* --- Tags --- */
+h3 {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--charcoal);
+  margin-bottom: 0.5rem;
+}
+
+p {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+/* ─── TAGS ────────────────────────────────────────────────────────────────── */
 .tag {
   display: inline-block;
-  font-size: 12px;
+  font-size: 11px;
+  font-family: system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
   padding: 3px 10px;
   border-radius: 6px;
   margin-bottom: 0.75rem;
 }
 .tag-amber { background: #faeeda; color: #854f0b; }
-.tag-red   { background: #fcebeb; color: #a32d2d; }
+.tag-red   { background: #f5e0e0; color: var(--crimson); }
 .tag-teal  { background: #e1f5ee; color: #0f6e56; }
 
-/* --- Buttons --- */
-.btn {
-  display: block;
-  width: 100%;
-  text-align: center;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 0.65rem 1rem;
-  font-size: 14px;
-  color: #1a1a1a;
-  cursor: pointer;
-  margin-bottom: 0.5rem;
-  transition: background 0.15s;
-}
-.btn:hover { background: #f0ede8; }
-.btn:disabled { opacity: 0.4; cursor: default; background: #fff; }
-
-.btn-primary {
-  background: #1a1a1a;
-  color: #fff;
-  text-align: center;
-  font-weight: 500;
-  border: none;
-}
-.btn-primary:hover { background: #333; }
-
-.btn-accuse { border-left: 3px solid #e24b4a; }
-
-.btn-small {
-  width: auto;
-  padding: 0.4rem 0.75rem;
-  font-size: 13px;
+/* ─── CARDS ───────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
 }
 
-/* --- Action bar --- */
+/* ─── NAV / ACTION BAR ────────────────────────────────────────────────────── */
 .action-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: var(--charcoal);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
   margin-bottom: 1.5rem;
 }
-.actions-left { font-size: 13px; color: #777; }
-.actions-left span { font-weight: 500; color: #1a1a1a; }
 
-/* --- Response box --- */
-.response-box {
-  background: #f0ede8;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  font-size: 14px;
-  color: #1a1a1a;
-  line-height: 1.7;
-  border-left: 3px solid #ccc;
+.actions-left {
+  font-size: 12px;
+  color: #D3D1C7;
+  letter-spacing: 0.03em;
 }
 
-/* --- Suspect grid --- */
+.actions-left span {
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.action-bar button {
+  font-size: 12px;
+  color: #888780;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.action-bar button:hover {
+  color: #D3D1C7;
+}
+
+/* ─── SECTION LABEL ───────────────────────────────────────────────────────── */
+.section-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  margin-bottom: 0.75rem;
+}
+
+/* ─── SUSPECT GRID ────────────────────────────────────────────────────────── */
 .suspect-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
+
 .suspect-btn {
-  background: #fff;
-  border: 1px solid #e0ddd6;
-  border-radius: 12px;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
   padding: 0.75rem;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  position: relative;
 }
-.suspect-btn:hover { border-color: #999; }
-.suspect-btn.active { border: 2px solid #1a1a1a; }
 
-/* --- Clue grid --- */
+.suspect-btn:hover {
+  border-color: #aaa9a4;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.suspect-btn.active {
+  border: 1.5px solid var(--charcoal);
+}
+
+/* Colored dot per suspect */
+.suspect-btn:nth-child(1)::before,
+.suspect-btn:nth-child(2)::before,
+.suspect-btn:nth-child(3)::before {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin: 0 auto 0.5rem auto;
+}
+
+.suspect-btn:nth-child(1)::before { background: var(--slate); }
+.suspect-btn:nth-child(2)::before { background: var(--terracotta); }
+.suspect-btn:nth-child(3)::before { background: var(--sage); }
+
+/* ─── BUTTONS ─────────────────────────────────────────────────────────────── */
+.btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.7);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 14px;
+  color: var(--charcoal);
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  transition: background 0.15s;
+}
+
+.btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.btn-primary {
+  background: var(--charcoal);
+  color: #D3D1C7;
+  font-weight: 500;
+  border: none;
+  text-align: center;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #3d3d3a;
+}
+
+/* Accuse button — the most dangerous thing on screen */
+.btn-accuse {
+  background: var(--crimson);
+  color: #F7C1C1;
+  border: none;
+  font-weight: 500;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.btn-accuse:hover:not(:disabled) {
+  background: #8f2424;
+}
+
+/* ─── RESPONSE BOX ────────────────────────────────────────────────────────── */
+.response-box {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  font-size: 14px;
+  color: var(--charcoal);
+  line-height: 1.7;
+  border-left: 3px solid var(--border);
+}
+
+/* ─── CLUE GRID ───────────────────────────────────────────────────────────── */
 .clue-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
+
 .clue-btn {
-  background: #fff;
-  border: 1px solid #e0ddd6;
+  background: rgba(255, 255, 255, 0.7);
+  border: 0.5px solid var(--border);
   border-radius: 8px;
   padding: 0.75rem;
   text-align: center;
@@ -135,69 +261,57 @@ p  { font-size: 15px; color: #555; line-height: 1.7; margin-bottom: 1rem; }
   font-size: 13px;
   color: #555;
   transition: background 0.15s;
+  width: 100%;
 }
-.clue-btn:hover { background: #f0ede8; }
+
+.clue-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.95);
+}
+
 .clue-btn.examined {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: default;
   border-style: dashed;
 }
 
-/* --- Divider --- */
+/* ─── DIVIDER ─────────────────────────────────────────────────────────────── */
 .divider {
   border: none;
-  border-top: 1px solid #e0ddd6;
+  border-top: 1px solid var(--border);
   margin: 1.5rem 0;
 }
 
-/* --- Score dots --- */
-.score-row { display: flex; gap: 6px; margin-bottom: 1.5rem; }
+/* ─── SCORE DOTS ──────────────────────────────────────────────────────────── */
+.score-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 1.5rem;
+}
+
 .score-dot {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: #e0ddd6;
-  border: 1px solid #ccc;
-}
-.score-dot.correct { background: #1d9e75; border-color: #0f6e56; }
-.score-dot.used    { background: #e24b4a; border-color: #a32d2d; }
-
-/* --- Section label --- */
-.section-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.75rem;
+  background: var(--dot-spent);
+  border: none;
 }
 
-/* --- Back link --- */
+.score-dot.correct { background: var(--gold); }
+.score-dot.used    { background: var(--dot-spent); }
+
+/* ─── BACK LINK ───────────────────────────────────────────────────────────── */
 .back-link {
   font-size: 13px;
-  color: #888;
+  color: var(--muted);
   cursor: pointer;
   margin-bottom: 1rem;
   display: inline-block;
+  transition: color 0.15s;
 }
-.back-link:hover { color: #1a1a1a; }
 
-/* --- Spoiler / reveal --- */
-.reveal-btn {
-  font-size: 13px;
-  color: #888;
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-decoration: underline;
-  padding: 0;
-  margin-top: 0.5rem;
-  display: block;
-}
-.reveal-btn:hover { color: #1a1a1a; }
-.spoiler { display: none; margin-top: 1rem; }
+.back-link:hover { color: var(--charcoal); }
 
-/* --- Game layout --- */
+/* ─── GAME LAYOUT ─────────────────────────────────────────────────────────── */
 .game-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;

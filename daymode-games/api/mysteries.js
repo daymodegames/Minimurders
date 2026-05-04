@@ -55,6 +55,20 @@ export default async function handler(req, res) {
       })
     }
 
+    // Build HOW options — shuffle so correct isn't always first
+    const howOptions = [
+      { id: 'how_correct', label: m.how_correct, correct: true },
+      { id: 'how_wrong_1', label: m.how_wrong_1, correct: false },
+      { id: 'how_wrong_2', label: m.how_wrong_2, correct: false },
+    ].filter(o => o.label).sort(() => Math.random() - 0.5)
+
+    // Build WHY options — shuffle so correct isn't always first
+    const whyOptions = [
+      { id: 'why_correct', label: m.why_correct, correct: true },
+      { id: 'why_wrong_1', label: m.why_wrong_1, correct: false },
+      { id: 'why_wrong_2', label: m.why_wrong_2, correct: false },
+    ].filter(o => o.label).sort(() => Math.random() - 0.5)
+
     return {
       id: m.id,
       title: m.title,
@@ -62,9 +76,12 @@ export default async function handler(req, res) {
       intro: m.intro,
       flavor: m.flavor,
       victim: m.victim,
-      actions: parseInt(m.actions),
+      actions: parseInt(m.actions) || 7,
       solution: m.solution,
       spoiler: m.spoiler,
+      resolution: m.resolution,
+      howOptions,
+      whyOptions,
       suspects,
       clues,
       accusations
